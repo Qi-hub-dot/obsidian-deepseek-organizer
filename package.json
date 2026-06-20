@@ -1,0 +1,23 @@
+{
+  "name": "obsidian-deepseek-organizer",
+  "version": "1.0.0",
+  "description": "Obsidian plugin integrating DeepSeek V4 Pro for intelligent note organization",
+  "main": "main.js",
+  "author": "Qi",
+  "repository": "https://github.com/Qi/obsidian-deepseek-organizer",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "keywords": ["obsidian", "plugin", "deepseek", "ai", "knowledge-management"],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "typescript": "^5.3.0",
+    "obsidian": "^1.5.0"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^4.8.0",
+    "mammoth": "^1.6.0"
+  }
+}
