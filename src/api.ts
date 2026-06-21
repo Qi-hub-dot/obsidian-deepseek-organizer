@@ -7,24 +7,30 @@ import { DeepSeekError } from "./types";
 export interface ChatOptions {
   stream?: boolean;
   signal?: AbortSignal;
+  maxTokens?: number;
+  stop?: string[];
+  topP?: number;
 }
 
 export class DeepSeekClient {
   private baseUrl: string;
   private apiKey: string;
   private model: string;
+  private reasoningEffort: string;
 
-  constructor(baseUrl: string, apiKey: string, model: string) {
+  constructor(baseUrl: string, apiKey: string, model: string, reasoningEffort = "medium") {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.apiKey = apiKey;
     this.model = model;
+    this.reasoningEffort = reasoningEffort;
   }
 
   /** 更新配置（runtime 热更新用） */
-  updateConfig(baseUrl: string, apiKey: string, model: string): void {
+  updateConfig(baseUrl: string, apiKey: string, model: string, reasoningEffort?: string): void {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.apiKey = apiKey;
     this.model = model;
+    if (reasoningEffort) this.reasoningEffort = reasoningEffort;
   }
 
   /**
@@ -36,12 +42,20 @@ export class DeepSeekClient {
     messages: ChatMessage[],
     options: ChatOptions = {},
   ): Promise<string | AsyncGenerator<string, void, undefined>> {
-    const { stream = false, signal } = options;
+    const { stream = false, signal, maxTokens, stop, topP } = options;
 
+    const isReasoner = this.model === "deepseek-reasoner";
     const body = JSON.stringify({
       model: this.model,
       messages,
       stream,
+      // DeepSeek 不支持 frequency_penalty/presence_penalty（会被静默忽略）
+      // 使用 DeepSeek 原生参数：top_p + top_k 防止重复
+      ...(isReasoner
+        ? { reasoning_effort: this.reasoningEffort }
+        : { temperature: 0.7, top_p: topP ?? 0.9, top_k: 40 }),
+      ...(maxTokens ? { max_tokens: maxTokens } : {}),
+      ...(stop ? { stop } : {}),
     });
 
     const headers: Record<string, string> = {
@@ -86,7 +100,7 @@ export class DeepSeekClient {
     return json.choices?.[0]?.message?.content || "";
   }
 
-  /** 流式迭代器 */
+  /** 流式迭代器 —— 单遍扫描，避免 split 分配数组 */
   private async *streamResponse(
     response: Response,
   ): AsyncGenerator<string, void, undefined> {
@@ -96,24 +110,33 @@ export class DeepSeekClient {
     }
 
     const decoder = new TextDecoder("utf-8");
-    let buffer = "";
+    let buf = "";
 
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        // 保留最后一个不完整行
-        buffer = lines.pop() || "";
+        buf += decoder.decode(value, { stream: true });
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        // 单遍扫描完整行，避免 split + pop 的数组分配
+        let start = 0;
+        let end: number;
+        while ((end = buf.indexOf("\n", start)) !== -1) {
+          let line = buf.slice(start, end);
+          start = end + 1;
 
-          const data = trimmed.slice(6);
-          if (data === "[DONE]") return;
+          // 快速预过滤：至少以 'd' 开头才是可能的 data: 行
+          if (line.length < 7 || line.charCodeAt(0) !== 100) continue;
+
+          line = line.trim();
+          if (!line.startsWith("data: ")) continue;
+
+          const data = line.slice(6);
+          if (data === "[DONE]") {
+            reader.releaseLock();
+            return;
+          }
 
           try {
             const parsed = JSON.parse(data);
@@ -123,6 +146,7 @@ export class DeepSeekClient {
             // 跳过非 JSON 行
           }
         }
+        buf = buf.slice(start);
       }
     } finally {
       reader.releaseLock();

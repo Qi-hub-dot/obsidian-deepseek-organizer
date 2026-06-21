@@ -67,12 +67,12 @@ export function buildChatContext(
   if (noteContent) {
     messages.push({
       role: "system",
-      content: `你是一个知识管理助手，集成在 Obsidian 笔记软件中。当前活跃笔记的内容如下：\n\n--- 当前笔记 ---\n${noteContent}\n---`,
+      content: `You are a knowledge management assistant inside Obsidian. The user has this note open:\n\n--- Current Note ---\n${noteContent.slice(0, 4000)}\n---\n\nHelp the user understand, organize, or improve this content. Be concise and adaptive — don't follow a fixed template. Respond naturally to what the user actually asks.`,
     });
   } else {
     messages.push({
       role: "system",
-      content: "你是一个知识管理助手，集成在 Obsidian 笔记软件中。帮助用户管理笔记、整理知识。",
+      content: "You are a knowledge management assistant inside Obsidian. Help the user manage notes, organize knowledge, and answer questions. Be concise and adaptive — respond naturally to what the user actually asks.",
     });
   }
 
@@ -88,21 +88,21 @@ export function buildSummarizePrompt(
   style: SummaryStyle,
 ): ChatMessage[] {
   const styleInstructions: Record<SummaryStyle, string> = {
-    concise: "请生成一段 3-5 句话的精简摘要，突出最核心的观点。",
-    detailed: "请生成详细摘要，包含主要观点、论据和结论，保留关键细节。",
-    outline: "请生成层级大纲，使用 Markdown 标题和列表结构。",
+    concise: "Generate a concise summary (3-5 sentences) that captures the core ideas. Be direct and insightful.",
+    detailed: "Generate a detailed summary covering main ideas, key arguments, and conclusions. Use your own words — do not copy-paste. Structure it naturally.",
+    outline: "Generate a hierarchical outline using Markdown headers and lists. Focus on logical structure, not verbatim transcription.",
   };
 
   return [
     {
       role: "system",
-      content: `你是一个专业的笔记摘要生成器。${styleInstructions[style]}
+      content: `You are a professional note summarizer. ${styleInstructions[style]}
 
-输出格式：纯 Markdown，不包含 JSON 包装。`,
+Output format: Clean Markdown. No JSON wrapper. Do not repeat the same point in different words.`,
     },
     {
       role: "user",
-      content: `请为以下笔记生成${style === "concise" ? "精简" : style === "detailed" ? "详细" : "大纲式"}摘要：\n\n${noteContent.slice(0, 30000)}`,
+      content: `Please summarize the following note:\n\n${noteContent.slice(0, 30000)}`,
     },
   ];
 }
