@@ -1,9 +1,9 @@
 {
   "id": "obsidian-deepseek-organizer",
-  "name": "DeepSeek AI 助手",
-  "version": "1.2.0",
+  "name": "AI 助手",
+  "version": "2.0.0",
   "minAppVersion": "1.5.0",
-  "description": "AI 对话、Vault 智能整理、知识图谱 Canvas、笔记拆分合并、文件批量处理、MOC 索引生成，让 AI 真正读懂你的知识库。",
+  "description": "国产大模型 AI 助手：DeepSeek / 通义千问 / 智谱 GLM / Ollama | 工具调用 · 多模态识别 · Vault 语义检索 · 知识图谱 · 一键笔记",
   "author": "Qi",
   "authorUrl": "https://github.com/Qi-hub-dot",
   "isDesktopOnly": false

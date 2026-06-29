@@ -10,6 +10,8 @@ export interface ChatOptions {
   maxTokens?: number;
   stop?: string[];
   topP?: number;
+  /** V4 Pro reasoning content callback */
+  onReasoning?: (chunk: string) => void;
 }
 
 export class DeepSeekClient {
@@ -17,6 +19,7 @@ export class DeepSeekClient {
   private apiKey: string;
   private model: string;
   private reasoningEffort: string;
+  private _reasoningCb: ((chunk: string) => void) | null = null;
 
   constructor(baseUrl: string, apiKey: string, model: string, reasoningEffort = "medium") {
     this.baseUrl = baseUrl.replace(/\/$/, "");
@@ -93,6 +96,7 @@ export class DeepSeekClient {
     }
 
     if (stream) {
+      this._reasoningCb = options.onReasoning || null;
       return this.streamResponse(response);
     }
 
@@ -140,8 +144,11 @@ export class DeepSeekClient {
 
           try {
             const parsed = JSON.parse(data);
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) yield delta;
+            const delta = parsed.choices?.[0]?.delta;
+            if (delta?.reasoning_content && this._reasoningCb) {
+              this._reasoningCb(delta.reasoning_content);
+            }
+            if (delta?.content) yield delta.content;
           } catch {
             // 跳过非 JSON 行
           }

@@ -1,24 +1,28 @@
 {
-  "name": "obsidian-deepseek-organizer",
-  "version": "1.2.0",
-  "description": "Obsidian plugin integrating DeepSeek V4 Pro for intelligent note organization",
+  "name": "obsidian-ai-assistant",
+  "version": "2.0.0",
+  "description": "国产大模型 AI 助手 — DeepSeek / 通义千问 / 智谱 GLM / Ollama，工具调用、多模态识别、Vault 语义检索",
   "main": "main.js",
   "author": "Qi",
-  "repository": "https://github.com/Qi-hub-dot/obsidian-deepseek-organizer",
+  "repository": "https://github.com/Qi-hub-dot/obsidian-ai-assistant",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "plugin", "deepseek", "ai", "knowledge-management"],
+  "keywords": ["obsidian", "plugin", "deepseek", "qwen", "glm", "ai", "knowledge-management", "rag"],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "esbuild": "^0.24.0",
     "typescript": "^5.3.0",
     "obsidian": "^1.5.0"
   },
   "dependencies": {
     "pdfjs-dist": "^4.8.0",
-    "mammoth": "^1.6.0"
+    "mammoth": "^1.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

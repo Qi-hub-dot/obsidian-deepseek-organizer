@@ -28,6 +28,12 @@ const config = {
   treeShaking: true,
   outfile: "main.js",
   minify: prod,
+  loader: {
+    ".tsx": "tsx",
+  },
+  jsx: "transform",
+  jsxFactory: "React.createElement",
+  jsxFragment: "React.Fragment",
 };
 
 if (prod) {

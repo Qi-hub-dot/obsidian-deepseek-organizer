@@ -1,104 +1,104 @@
-# DeepSeek AI 助手 — Obsidian 插件
+# AI 助手 — Obsidian 插件
 
-将 DeepSeek V4 大模型深度嵌入 Obsidian，实现AI 对话、Vault 全文检索、智能笔记生成、知识图谱绘制，让 AI 真正「读懂」你的知识库。
+国产大模型 AI 助手，支持 **DeepSeek / 通义千问 / 智谱 GLM / Ollama**，具备工具调用、多模态识别、Vault 语义检索等能力。
 
 ## ✨ 功能
 
-### 💬 AI 对话
-| 功能 | 描述 |
+### 🤖 多模型支持
+| 模型 | 特点 |
 |------|------|
-| 流式对话 | 实时打字效果，Markdown 完整渲染（表格/公式/代码/引用/Callout） |
-| Vault 感知 | 每条消息自动全文搜索笔记，AI 知晓你的知识库内容 |
-| 显式读笔记 | 说「读一下 XX 笔记」即可注入笔记全文到上下文 |
-| 多轮对话 | 上下文连续，追问不丢失 |
-| 缓存优化 | 系统提示词 Prompt Caching，降低 token 消耗 |
+| 🔴 DeepSeek V4 Flash / Pro | 默认，快速 + 深度推理 |
+| 🟠 通义千问 (Qwen) | 阿里云，OpenAI 兼容 |
+| 🔵 智谱 GLM-4 | 清华，OpenAI 兼容 |
+| 🦙 Ollama 本地 | 支持 qwen2.5 等本地模型 |
 
-### 🆕 会话管理
-| 功能 | 描述 |
-|------|------|
-| 新建会话 | ➕ 一键开始新对话 |
-| 历史恢复 | 自动保存最近 5 个对话，点击即恢复 |
-| 持久化 | 切换笔记不丢失对话，只有「新建会话」才清空 |
+### 🔧 AI 工具调用
+AI 可**自主执行操作**，无需手动操作：
 
-### 📝 笔记生成
-| 功能 | 描述 |
+| 工具 | 功能 |
 |------|------|
-| 智能触发 | 说「生成笔记 / 创建笔记」即自动保存为 .md 到 Knowledge/ 目录 |
-| 规范格式 | 自动添加 frontmatter（title/date/tags）+ [[wikilink]] |
-| 框架摘要 | 对话框仅显示标题结构+要点，完整内容在笔记中查看 |
-| 普通对话 | 不自动建笔记，只展示完整回答 |
+| `searchVault` | 搜索 Vault 中相关笔记 |
+| `readNote` | 读取指定笔记全文 |
+| `createNote` | 创建新笔记（自动分类目录） |
+| `appendNote` | 追加内容到已有笔记 |
+| `getFileTree` | 浏览目录结构 |
+| `getTags` | 查看所有标签 |
+| `getCurrentTime` | 获取当前时间 |
+
+> 工作流：用户提问 → AI 判断是否需要工具 → 调用工具获取结果 → 基于结果回答。最多 20 轮，连续 2 轮无工具调用自动结束。
+
+### 📷 多模态文件识别
+统一的「附件」按钮，自动判断文件类型：
+
+| 文件类型 | 处理方式 |
+|----------|---------|
+| 图片 (png/jpg/gif/webp) | 视觉模型识别 → 注入上下文 |
+| PDF (含扫描件) | 渲染首页 → 视觉模型提取文字 |
+| Word (docx) | mammoth 提取文字 |
+| Markdown/TXT | 直接解析 → 注入上下文 |
+
+> 视觉模型独立配置，支持**通义千问 VL** / **智谱 GLM-4V**。
+
+### 🔍 Vault 语义检索 (RAG)
+- 本地 TF-IDF 全文索引，**无需外部嵌入服务**
+- 每次对话自动检索 Top-5 相关笔记注入上下文
+- 搜索结果标注 🟢高相关 / 🟡低相关，AI 自行判断是否采用
+
+### 💬 对话体验
+- 流式输出 + 三点跳动加载
+- **思考面板**：V4 Pro 推理过程可折叠展示
+- 消息操作：复制 / 知识图谱 / 重新生成 / 编辑 / 删除（悬停显示）
+- 模型一键切换，顶栏实时同步图标和标签
+- Token 估算 + 上下文标签栏
+
+### 📝 智能笔记生成
+- 说「生成笔记」→ AI 先搜索 Vault → 关联 [[已有笔记]] → 自动创建
+- 路径按内容自动分类（如 `编程/Python.md`、`学习/线性代数.md`）
+- 带 frontmatter（title/date/tags）+ 双向链接
 
 ### 🧠 知识图谱
-| 功能 | 描述 |
-|------|------|
-| Canvas 生成 | 对笔记内容生成 MECE 思维导图，自动节点布局 |
-| 进度条 | 生成过程显示动画进度条 |
-| 一键应用 | 对话框内点击按钮即可生成 |
+- 对笔记/AI 回答生成 Canvas 思维导图
+- 自动节点布局 + 颜色编码
 
-### 📥 知识库工具
-| 功能 | 描述 |
-|------|------|
-| 文件导入拆分 | .md / .txt / .pdf / .docx → AI 按主题拆分为原子笔记 |
-| 摘要生成 | 选中笔记，一键生成简洁/详细/大纲摘要 |
-| 智能标签 | AI 推荐 5-10 个 frontmatter 标签 |
-| 双向链接 | 发现笔记间隐含关联，建议 `[[wikilink]]` |
-| 内容润色 | 语句优化 / 精简 / 扩展 / 修正语法 |
-| 隐私脱敏 | 本地过滤手机号/身份证/邮箱/IP，规则可独立开关 |
+### ⚡ 快捷操作
+- 编辑器选中文本 → 内联润色 / 解释 / 翻译
+- 6 组快捷提示，一键发送
+- 自定义 System Prompt
+- 一键导出对话为 Markdown
 
-## 🚀 安装
+### 🔒 隐私
+- 本地 PII 脱敏（手机号/身份证/邮箱/IP）
+- 记忆缓存自动 LRU 清理
 
-### 手动安装
+## 📦 安装
 
 ```bash
-cd /path/to/your/vault/.obsidian/plugins
-mkdir obsidian-deepseek-organizer
-cd obsidian-deepseek-organizer
-# 复制构建产物
-cp main.js styles.css manifest.json .
-```
-
-重启 Obsidian → 设置 → 社区插件 → 启用「DeepSeek AI 助手」
-
-### 开发构建
-
-```bash
-git clone https://github.com/Qi-hub-dot/obsidian-deepseek-organizer.git
-cd obsidian-deepseek
-npm install
-npm run dev          # 监听模式
-npm run build        # 生产构建
+# 1. 下载 Release 中的 main.js / styles.css / manifest.json
+# 2. 放入 vault 的 .obsidian/plugins/obsidian-deepseek-organizer/
+# 3. 重启 Obsidian → 设置 → 启用「AI 助手」
 ```
 
 ## ⚙️ 配置
 
-设置 → DeepSeek 知识库整理：
+| 配置项 | 说明 |
+|--------|------|
+| 🔴 DeepSeek | API Key + 模型选择 (Flash/Pro) + 推理强度 |
+| 🟠 通义千问 | API Key + Base URL + 模型 (qwen-plus/max) |
+| 🔵 智谱 GLM | API Key + Base URL + 模型 (glm-4-flash/plus) |
+| 🦙 Ollama | Base URL + 本地模型名 |
+| 📷 多模态 | 视觉提供商 (通义千问 VL / GLM-4V) + API Key + 模型 |
+| 💬 System Prompt | 自定义 AI 行为指令（支持变量） |
+| 🔒 脱敏 | 独立开关各 PII 规则 |
+| 🧠 记忆 | 文件夹 + 容量限制 |
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| API Base URL | DeepSeek API 端点 | `https://api.deepseek.com` |
-| API Key | DeepSeek API 密钥 | — |
-| 模型 | deepseek-chat / deepseek-reasoner | `deepseek-chat` |
-| 脱敏开关 | PII 本地过滤 | ✅ 开启 |
-| 目标目录 | 笔记保存位置 | `Knowledge` |
+## 🛠 开发
 
-支持环境变量 `DEEPSEEK_API_KEY`（优先级高于设置面板）。
-
-## 🏗 技术架构
-
-```
-TypeScript + esbuild
-├── main.ts          插件入口
-├── src/
-│   ├── api.ts       DeepSeekClient (fetch + SSE 流式)
-│   ├── sidebar.ts   侧边栏视图 + Vault 搜索 + 会话管理
-│   ├── pipeline.ts  导入/摘要/标签/润色流水线
-│   ├── sanitizer.ts PII 脱敏引擎
-│   ├── prompts.ts   Prompt 模板
-│   ├── memory.ts    对话记忆
-│   ├── parsers/     文件解析器 (md/txt/pdf/docx)
-│   └── ui/          chat-view、预览、Canvas
-├── styles.css       纯 CSS（无框架依赖）
-└── main.js          esbuild 打包产物
+```bash
+git clone https://github.com/Qi-hub-dot/obsidian-ai-assistant.git
+cd obsidian-ai-assistant
+npm install
+npm run dev    # 监听模式
+npm run build  # 生产构建 → main.js
 ```
 
 ## 📄 许可证
